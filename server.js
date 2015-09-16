@@ -14,10 +14,24 @@ app.get('/', function (req, res) {
 
 http.listen(3000, 'localhost');
 
+var users = [];
+
 io.on('connection', function(socket) {
   console.log('client connected');
+
+  socket.on('login', function(user) {
+    console.log('logged in!');
+    users.push(user);
+    io.emit('newuser', user);
+  });
+
   socket.on('msg', function(data) {
     console.log(data);
     io.emit('msg', data);
   });
+
+  socket.on('disconnect', function() {
+    console.log('disco');
+  });
+
 });

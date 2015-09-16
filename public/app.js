@@ -9,6 +9,13 @@ var messages = [
   {content: 'Dawg, you lazy. Remember the last time you skipped your leg day? You ended up programming PHP 3.0 for a whole week and had to optimise the app for IE 5.0. Wanna try that again?', sender: {name: 'Daniel', id: 'somethingelse'}}
 ];
 
+var users = [
+  {name: 'Jerry'},
+  {name: 'Daniel'},
+  {name: 'Tommi'},
+  {name: 'Sami'}
+];
+
 
 var socket = io.connect('http://localhost:3000');
 
@@ -86,7 +93,7 @@ var ChatBox = React.createClass({
     }
   },
   componentDidMount: function() {
-    var rthis = this
+    var rthis = this;
     socket.on('msg', function(data) {
       console.log(this.state);
       if (data.sender.id !== id) {
@@ -108,7 +115,72 @@ var ChatBox = React.createClass({
   }
 });
 
+var LoginBox = React.createClass({
+  send: function(e) {
+    var name = document.getElementById('login-field-input').value;
+    if (e.keyCode === 13) {
+      React.render(
+        <ChatBox messages={messages} name={name}/>,
+        document.getElementById('chat-area')
+      );
+      React.render(
+        <ActiveUsers />,
+        document.getElementById('user-area')
+      );
+      socket.emit('login', {name: name});
+    }
+  },
+  render: function() {
+    return (
+      <div className="login">
+        <input type="text" id="login-field-input" placeholder="Who are you?" onKeyDown={this.send}></input>
+      </div>
+    );
+  }
+});
+
+var ActiveUsers = React.createClass({
+  addUser: function(u) {
+    this.setState({
+      users: this.state.users.concat(u)
+    });
+  },
+  getInitialState: function() {
+    return {
+      users: users
+    }
+  },
+  componentDidMount: function() {
+    var app = this;
+    socket.on('newuser', function(u) {
+      console.log('new user!');
+      app.addUser(u);
+    });
+  },
+  render: function() {
+    return (
+      <div className="users">
+        <ul>
+          {this.state.users.map(function(u) {
+            return <UserRow user={u}/>
+          })}
+        </ul>
+      </div>
+    );
+  }
+});
+
+var UserRow = React.createClass({
+  setActive: function(u) {
+    console.log(u);
+    console.log(':D');
+  },
+  render: function() {
+    return <li onClick={this.setActive}>{this.props.user.name}</li>;
+  }
+})
+
 React.render(
-  <ChatBox messages={messages} />,
-  document.getElementById('content')
+  <LoginBox />,
+  document.getElementById('chat-area')
 );
