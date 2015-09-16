@@ -15,6 +15,7 @@ app.get('/', function (req, res) {
 http.listen(3000, 'localhost');
 
 var users = [];
+var activeChats = [];
 
 io.on('connection', function(socket) {
   console.log('client connected');
@@ -32,6 +33,13 @@ io.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     console.log('disco');
+  });
+
+  // {participants: [user1, user2]}
+  socket.on('newchat', function(chatParams) {
+    var newChat = {};
+    newChat.participants = chatParams.participants;
+    activeChats.push(newChat);
   });
 
 });

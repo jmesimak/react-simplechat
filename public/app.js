@@ -1,4 +1,4 @@
-var id = (Math.random().toString(36)+'00000000000000000').slice(2, 6+2);
+var id = (Math.random().toString(36)+'00000000000000000').slice(2, 15+2);
 
 var messages = [
   {content: 'Hi Daniel!', sender: {name: 'Jerry', id: id}, sentByUser: true},
@@ -16,6 +16,7 @@ var users = [
   {name: 'Sami'}
 ];
 
+var chats = [];
 
 var socket = io.connect('http://localhost:3000');
 
@@ -127,7 +128,7 @@ var LoginBox = React.createClass({
         <ActiveUsers />,
         document.getElementById('user-area')
       );
-      socket.emit('login', {name: name});
+      socket.emit('login', {name: name, id: id});
     }
   },
   render: function() {
@@ -170,10 +171,13 @@ var ActiveUsers = React.createClass({
   }
 });
 
+// Should colour code these, green for new messages, blue for active chat without new messages.
+// White for non-initiated chat.
 var UserRow = React.createClass({
-  setActive: function(u) {
-    console.log(u);
-    console.log(':D');
+  setActive: function() {
+    var newChat = {};
+    newChat.participants = [{name: this.props.user.name, id: this.props.user.id}, {id: id, name: 'todo'}];
+    socket.emit('newchat', newChat);
   },
   render: function() {
     return <li onClick={this.setActive}>{this.props.user.name}</li>;
